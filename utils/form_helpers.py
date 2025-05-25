@@ -1,3 +1,4 @@
+import os
 import time
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -66,7 +67,7 @@ def fill_personal_form(driver, wait):
             )))
             highlight_element(driver, upload_input, border_color="#6c757d")
             driver.execute_script("arguments[0].style.display = 'block';", upload_input)
-            upload_input.send_keys("data/BoazRichResume.pdf")
+            upload_input.send_keys(os.path.abspath("data/BoazRichResume.pdf"))
             print("📎 Resume file uploaded")
 
             time.sleep(1)
