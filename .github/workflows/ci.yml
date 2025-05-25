@@ -1,0 +1,66 @@
+name: Run Rafael Automation Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Install Chrome and dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget unzip \
+          fonts-liberation libappindicator3-1 libatk-bridge2.0-0 \
+          libnspr4 libnss3 libxss1 xdg-utils libgbm1 libgtk-3-0 libx11-xcb1 \
+          libxcomposite1 libxdamage1 libxrandr2 libu2f-udev libvulkan1 libasound2t64 \
+          xvfb
+        wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+        sudo apt install -y ./google-chrome-stable_current_amd64.deb
+
+    - name: Show Chrome version (for debug)
+      run: google-chrome --version
+
+    - name: Set PYTHONPATH
+      run: echo "PYTHONPATH=$PWD" >> $GITHUB_ENV
+
+    - name: Run tests in virtual display
+      env:
+        CI: true
+      run: xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24' pytest tests/ --maxfail=1 --disable-warnings --html=report.html --self-contained-html -v
+
+    - name: List all files (for debugging)
+      if: always()
+      run: find . -type f
+
+    - name: Upload debug artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: debug-artifacts
+        path: |
+          *.png
+          *.html
+          *.log
+
+    - name: Upload HTML report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: pytest-html-report
+        path: report.html

@@ -1,0 +1,16 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Pytest artifacts
+.pytest_cache/
+*.log
+*.html
+*.png
+report.html
+screenshots/
+
+# macOS / editor stuff
+.DS_Store
+.vscode/
+
